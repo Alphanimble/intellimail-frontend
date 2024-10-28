@@ -1,12 +1,11 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState } from 'react'
 import { MoonIcon, SunIcon, SendIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
 
-export default function Home() {
+export function Page() {
   const [isDarkMode, setIsDarkMode] = useState(false)
-  const [inputValue, setInputValue] = useState('')
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode)
@@ -30,32 +29,6 @@ export default function Home() {
     }
   }
 
-  const handleCardClick = (text: string) => {
-    setInputValue(text)
-  }
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    try {
-      const response = await fetch('http://localhost:5000/get_data', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt: inputValue }),
-      })
-      if (!response.ok) {
-        throw new Error('Network response was not ok')
-      }
-      const data = await response.json()
-      console.log('Response:', data)
-      // Handle the response data here (e.g., update state, show a message)
-    } catch (error) {
-      console.error('Error:', error)
-      // Handle errors here (e.g., show an error message to the user)
-    }
-  }
-
   return (
     <div className={`min-h-screen flex flex-col ${isDarkMode ? 'dark' : ''}`}>
       <header className="flex justify-between items-center p-4 bg-white dark:bg-gray-900 shadow-md">
@@ -76,7 +49,7 @@ export default function Home() {
 
       <main className="flex-grow p-4 bg-white dark:bg-gray-900">
         <section className="max-w-4xl mx-auto">
-          <motion.h2
+          <motion.h2 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -84,7 +57,7 @@ export default function Home() {
           >
             Greeting message
           </motion.h2>
-          <motion.h3
+          <motion.h3 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -96,7 +69,7 @@ export default function Home() {
           <div className="mb-8">
             <div id="chatbot" className="mb-4 h-64 overflow-y-auto"></div>
 
-            <motion.div
+            <motion.div 
               variants={containerVariants}
               initial="hidden"
               animate="visible"
@@ -114,7 +87,6 @@ export default function Home() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-left hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors relative h-48 overflow-hidden group shadow-md"
-                  onClick={() => handleCardClick(suggestion.text)}
                 >
                   <span className="text-lg md:text-xl font-medium text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                     {suggestion.text}
@@ -126,24 +98,23 @@ export default function Home() {
               ))}
             </motion.div>
 
-            <motion.form
+            <motion.form 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              id="chat-form"
-              onSubmit={handleSubmit}
+              id="chat-form" 
               className="relative"
             >
               <input
                 type="text"
                 id="chat-input"
-                placeholder="talk to your emails!"
+                placeholder="Ask me anything about email..."
                 className="w-full p-4 pr-12 rounded-full bg-gray-100 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-gray-200 shadow-md"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
                 required
               />
               <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 type="submit"
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
                 aria-label="Send message"
@@ -158,10 +129,10 @@ export default function Home() {
       <div id="modal" className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg text-center">
           <p className="mb-4 text-gray-800 dark:text-gray-200">Thank you for your input! We are processing your request...</p>
-          <motion.button
+          <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            id="continue-button"
+            id="continue-button" 
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
           >
             Continue
