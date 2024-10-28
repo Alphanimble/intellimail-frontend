@@ -1,16 +1,27 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, FormEvent, useEffect } from 'react'
 import { MoonIcon, SunIcon, SendIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { DynamicJsonTableComponent } from '@/components/dynamic-json-table'
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [inputValue, setInputValue] = useState('')
+  const [response, setResponse] = useState('')
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode)
   }
+
+  useEffect(() => {
+    if (response != '') {
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, [response]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -37,6 +48,8 @@ export default function Home() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     try {
+      const temp = inputValue
+      setInputValue("Processing Prompt ...")
       const response = await fetch('http://localhost:5000/get_data', {
         method: 'POST',
         headers: {
@@ -44,11 +57,13 @@ export default function Home() {
         },
         body: JSON.stringify({ prompt: inputValue }),
       })
+      setInputValue(temp)
       if (!response.ok) {
         throw new Error('Network response was not ok')
       }
-      const data = await response.json()
-      console.log('Response:', data)
+      const res = await response.json()
+      console.log('Response:', res.data)
+      setResponse(JSON.parse(res.data))
       // Handle the response data here (e.g., update state, show a message)
     } catch (error) {
       console.error('Error:', error)
@@ -82,7 +97,7 @@ export default function Home() {
             transition={{ duration: 0.5 }}
             className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-red-600 text-transparent bg-clip-text"
           >
-            Greeting message
+            Hello There !
           </motion.h2>
           <motion.h3
             initial={{ opacity: 0, y: -20 }}
@@ -94,7 +109,7 @@ export default function Home() {
           </motion.h3>
 
           <div className="mb-8">
-            <div id="chatbot" className="mb-4 h-64 overflow-y-auto"></div>
+            <div id="chatbot" className="mb-4 h-16 overflow-y-auto"></div>
 
             <motion.div
               variants={containerVariants}
@@ -103,10 +118,10 @@ export default function Home() {
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
             >
               {[
-                { text: "Show me emails about project updates.", icon: "📈" },
-                { text: "Find emails related to last month's budget report.", icon: "💰" },
-                { text: "Retrieve all emails from the marketing team.", icon: "📣" },
-                { text: "List emails containing the word 'meeting' from the past week.", icon: "🗓️" },
+                { text: "Fetch me some details of people seeking investments", icon: "📈" },
+                { text: "Get me all the emails' intents sent to John.", icon: "🧑" },
+                { text: "Retrieve five of the latest discussion emails", icon: "📣" },
+                { text: "Can you check if there are any meetings in the schedule", icon: "🗓️" },
               ].map((suggestion, index) => (
                 <motion.button
                   key={index}
@@ -167,7 +182,13 @@ export default function Home() {
             Continue
           </motion.button>
         </div>
+
+
       </div>
+      <div className='px-32 pb-12 h-fit flex items-center justify-center bg-white dark:bg-gray-900 dark:text-white'>
+        <DynamicJsonTableComponent data={response} />
+      </div>
+
     </div>
   )
 }
