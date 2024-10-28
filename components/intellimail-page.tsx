@@ -7,28 +7,13 @@ import Particles from 'react-tsparticles'
 import type { Engine } from 'tsparticles-engine'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-
-const particlesOptions = {
-  particles: {
-    number: { value: 50, density: { enable: true, value_area: 800 } },
-    color: { value: '#333333' },
-    shape: { type: 'circle', stroke: { width: 0, color: '#000000' } },
-    opacity: { value: 0.3, random: false, anim: { enable: false } },
-    size: { value: 2, random: true, anim: { enable: false } },
-    line_linked: { enable: true, distance: 150, color: '#333333', opacity: 0.2, width: 1 },
-    move: { enable: true, speed: 0.5, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false },
-  },
-  interactivity: {
-    detect_on: 'canvas',
-    events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true },
-    modes: { grab: { distance: 400, line_linked: { opacity: 1 } }, repulse: { distance: 200, duration: 0.4 } },
-  },
-  retina_detect: true,
-}
+import axios from 'axios'
+import { DynamicJsonTableComponent } from './dynamic-json-table'
 
 export function IntellimailPage() {
-  const [email, setEmail] = useState('')
+  const [prompt, setPrompt] = useState('')
   const [gradientPosition, setGradientPosition] = useState(0)
+  const [response, setResponse] = useState('')
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -38,13 +23,43 @@ export function IntellimailPage() {
     return () => clearInterval(intervalId)
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Submitted email:', email)
+    console.log('Submitted prompt:', prompt)
+
+    try {
+      const res = await axios.post('http://localhost:5000/get_data', { prompt }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      console.log(JSON.parse(res.data.data)) // Store the response in the state
+      console.log(JSON.stringify(res.data.query)) // Store the response in the state
+      setResponse(JSON.parse(res.data.data))
+    } catch (error) {
+      console.error('There was an error!', error)
+      setResponse(error.message) // Store the error message in the state
+    }
   }
 
   const particlesInit = async (engine: Engine) => {
-    await tsParticles.load("tsparticles", particlesOptions)
+    await tsParticles.load("tsparticles", {
+      particles: {
+        number: { value: 50, density: { enable: true, value_area: 800 } },
+        color: { value: '#333333' },
+        shape: { type: 'circle', stroke: { width: 0, color: '#000000' } },
+        opacity: { value: 0.3, random: false, anim: { enable: false } },
+        size: { value: 2, random: true, anim: { enable: false } },
+        line_linked: { enable: true, distance: 150, color: '#333333', opacity: 0.2, width: 1 },
+        move: { enable: true, speed: 0.5, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false },
+      },
+      interactivity: {
+        detect_on: 'canvas',
+        events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true },
+        modes: { grab: { distance: 400, line_linked: { opacity: 1 } }, repulse: { distance: 200, duration: 0.4 } },
+      },
+      retina_detect: true,
+    })
   }
 
   const gradientStyle = {
@@ -61,7 +76,7 @@ export function IntellimailPage() {
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="text-4xl font-bold tracking-tight text-white"
+          className="text-4xl font-bold tracking-tight text-gray-400"
         >
           Intellimail
         </motion.h1>
@@ -84,17 +99,18 @@ export function IntellimailPage() {
         <Input
           type="text"
           placeholder="Talk to your emails"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
           className="w-full px-4 py-2 rounded-md bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-500"
         />
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           className="w-full bg-gray-700 hover:bg-gray-600 text-gray-200"
         >
           Submit
         </Button>
       </motion.form>
+      <DynamicJsonTableComponent data={response} />
     </div>
   )
 }
